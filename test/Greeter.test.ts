@@ -1,7 +1,6 @@
 import { Wallet, BigNumber, constants } from 'ethers';
 import { expect } from 'chai';
 import { deployments, network } from 'hardhat';
-import { USDC_TOKEN } from './utils/constants';
 import { ether } from './utils/utils';
 
 const base = ether('1');
@@ -15,8 +14,6 @@ describe('Greeter', function () {
   const setupTest = deployments.createFixture(async ({ deployments, ethers }, options) => {
     await deployments.fixture(''); // ensure you start from a fresh deployments
     [owner, user, other] = await (ethers as any).getSigners();
-
-    const provider = await tokenProviderQuick(USDC_TOKEN);
     const Greeter = await ethers.getContractFactory('Greeter');
     greeter = await Greeter.deploy('Hello, world!');
     await greeter.deployed();

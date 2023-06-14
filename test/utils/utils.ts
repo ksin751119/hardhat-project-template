@@ -1,7 +1,6 @@
 import { expect, assert } from 'chai';
 import { BigNumber, Signer } from 'ethers';
 import { ethers, network } from 'hardhat';
-import { USDC_TOKEN, WETH_TOKEN, WMATIC_TOKEN, QUICKSWAP_FACTORY, SUSHISWAP_FACTORY } from './constants';
 const hre = require('hardhat');
 
 export function expectEqWithinBps(actual: BigNumber, expected: BigNumber, bps: number = 1, exponent: number = 4) {
@@ -18,14 +17,6 @@ export function ether(num: any) {
 
 export function mwei(num: any) {
   return ethers.utils.parseUnits(num, 6);
-}
-
-export function getCallData(artifact: any, name: string, params: any) {
-  return artifact.interface.encodeFunctionData(name, params);
-}
-
-export function getCallActionData(ethValue: any, artifact: any, funcName: string, params: any) {
-  return ethers.utils.defaultAbiCoder.encode(['uint256', 'bytes'], [ethValue, getCallData(artifact, funcName, params)]);
 }
 
 export async function impersonateAndInjectEther(address: string) {
@@ -67,36 +58,6 @@ export function getFuncSig(artifact: any, name: string) {
   return artifact.interface.getSighash(name);
 }
 
-export async function tokenProviderQuick(token0 = USDC_TOKEN, token1 = WETH_TOKEN, factoryAddress = QUICKSWAP_FACTORY) {
-  if (token0 === WETH_TOKEN) {
-    token1 = USDC_TOKEN;
-  }
-  return _tokenProviderUniLike(token0, token1, factoryAddress);
-}
-
-export async function maticProviderWmatic() {
-  // Impersonate wmatic
-  await hre.network.provider.send('hardhat_impersonateAccount', [WMATIC_TOKEN]);
-  return await (ethers as any).getSigner(WMATIC_TOKEN);
-
-  // return WMATIC_TOKEN;
-}
-
-export async function tokenProviderSushi(token0 = USDC_TOKEN, token1 = WETH_TOKEN, factoryAddress = SUSHISWAP_FACTORY) {
-  if (token0 === WETH_TOKEN) {
-    token1 = USDC_TOKEN;
-  }
-  return _tokenProviderUniLike(token0, token1, factoryAddress);
-}
-
-export async function _tokenProviderUniLike(token0: string, token1: string, factoryAddress: string) {
-  const factory = await ethers.getContractAt('IUniswapV2Factory', factoryAddress);
-
-  const pair = await factory.getPair(token0, token1);
-  await _impersonateAndInjectEther(pair);
-  return await (ethers as any).getSigner(pair);
-}
-
 export async function _impersonateAndInjectEther(address: string) {
   // Impersonate pair
   await hre.network.provider.send('hardhat_impersonateAccount', [address]);
@@ -121,22 +82,6 @@ export function padRightZero(s: string, length: any) {
     s = s + '0';
   }
   return s;
-}
-
-export function calcSqrt(y: BigNumber) {
-  let z = BigNumber.from(0);
-  if (y.gt(3)) {
-    z = y;
-    let x = y.div(BigNumber.from(2)).add(BigNumber.from(1));
-    while (x.lt(z)) {
-      z = x;
-      x = y.div(x).add(x).div(BigNumber.from(2));
-    }
-  } else if (!y.eq(0)) {
-    z = BigNumber.from(1);
-  }
-
-  return z;
 }
 
 export async function latest() {
